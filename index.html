@@ -135,9 +135,11 @@
     }
 
     async function checkStock(name) {
-      alert(
-        "ここに今後、ガシャポンどこ？検索結果を表示する！\n\n商品：" + name
-      );
+      const url =
+  "https://gashapon.jp/products/result.php?search=" +
+  encodeURIComponent(name);
+
+window.open(url, "_blank");
     }
 
     render();
