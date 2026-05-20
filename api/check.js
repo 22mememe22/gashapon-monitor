@@ -21,21 +21,63 @@ export default async function handler(req, res) {
 
     if (links) {
       links.forEach((a) => {
-        const text = a.replace(/<[^>]*>/g, "").trim();
+        const name = a.replace(/<[^>]*>/g, "").trim();
         const hrefMatch = a.match(/href="([^"]+)"/);
 
-        if (text && text.length > 5 && hrefMatch) {
-          let link = hrefMatch[1];
+        if (!name || !hrefMatch) return;
 
-          if (!link.startsWith("http")) {
-            link = "https://gashapon.jp" + link;
-          }
+        const link = hrefMatch[1];
 
-          items.push({
-            name: text,
-            link
-          });
+        // 🔥 ゴミ判定（ここがBの本体）
+        const ignoreWords = [
+          "ログイン",
+          "会員",
+          "登録",
+          "LINE",
+          "利用規約",
+          "プライバシー",
+          "ご利用",
+          "よくある",
+          "検索条件",
+          "Cookies",
+          "友だち追加",
+          "送る",
+          "新規会員",
+          "FAQ",
+          "アクセス",
+          "ガシャポンLINE",
+          "プライバシーポリシー"
+        ];
+
+        // ❌ 明らかなゴミは除外
+        if (
+          name.length < 6 ||
+          ignoreWords.some((w) => name.includes(w))
+        ) {
+          return;
         }
+
+        // ❌ さらに商品っぽくないもの除外
+        if (
+          !name.includes("ガシャポン") &&
+          !name.includes("ちいかわ") &&
+          !name.includes("コレクション") &&
+          !name.includes("シリーズ") &&
+          !name.includes("マスコット") &&
+          !name.includes("フィギュア")
+        ) {
+          return;
+        }
+
+        let finalLink = link;
+        if (!finalLink.startsWith("http")) {
+          finalLink = "https://gashapon.jp" + finalLink;
+        }
+
+        items.push({
+          name,
+          link: finalLink
+        });
       });
     }
 
