@@ -51,6 +51,12 @@
       background: #fafafa;
       border-radius: 10px;
     }
+
+    .status {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
   </style>
 </head>
 
@@ -81,10 +87,24 @@
       const list = document.getElementById("list");
       list.innerHTML = "";
 
-      items.forEach((item) => {
+      items.forEach((item, index) => {
         list.innerHTML += `
           <div class="item">
-            ${item}
+            <b>${item.name}</b>
+
+            <div class="status">
+              石川県監視中
+            </div>
+
+            <button onclick="checkStock('${item.name}')">
+              在庫確認
+            </button>
+
+            <button onclick="removeItem(${index})">
+              削除
+            </button>
+
+            <div id="result-${index}" class="status"></div>
           </div>
         `;
       });
@@ -95,13 +115,29 @@
 
       if (!input.value) return;
 
-      items.push(input.value);
+      items.push({
+        name: input.value
+      });
 
       localStorage.setItem("items", JSON.stringify(items));
 
       input.value = "";
 
       render();
+    }
+
+    function removeItem(index) {
+      items.splice(index, 1);
+
+      localStorage.setItem("items", JSON.stringify(items));
+
+      render();
+    }
+
+    async function checkStock(name) {
+      alert(
+        "ここに今後、ガシャポンどこ？検索結果を表示する！\n\n商品：" + name
+      );
     }
 
     render();
