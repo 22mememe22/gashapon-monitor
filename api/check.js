@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
         const link = hrefMatch[1];
 
-        // ❌ 完全ノイズ除去
+        // ❌ ノイズだけ除去（軽くする）
         const badWords = [
           "ログイン",
           "会員",
@@ -46,29 +46,18 @@ export default async function handler(req, res) {
           "FAQ",
           "アクセス",
           "ガシャポンどこ？",
-          "妖怪ウォッチ",
-          "クレヨンしんちゃん",
-          "ハンターハンター",
-          "めじるしアクセサリー"
+          "プライバシーポリシー"
         ];
 
         if (
           !name ||
-          name.length < 6 ||
+          name.length < 5 ||
           badWords.some((w) => name.includes(w))
         ) {
           return;
         }
 
-        // ❗「商品ページだけ」に限定
-        if (!link.includes("/products/result.php")) {
-          return;
-        }
-
-        // ❗さらに“検索キーワードURL系”は除外
-        if (link.includes("?free=") && !name.includes(keyword)) {
-          return;
-        }
+        // 👉 URL制限は完全に削除（ここ超重要）
 
         let finalLink = link;
         if (!finalLink.startsWith("http")) {
