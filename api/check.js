@@ -21,12 +21,10 @@ export default async function handler(req, res) {
 
     const items = [];
 
-    // とりあえずリンクベースで商品っぽいものを拾う
     $("a").each((i, el) => {
       const name = $(el).text().trim();
       const link = $(el).attr("href");
 
-      // ノイズ除去（短すぎる文字は無視）
       if (name && name.length > 5 && link) {
         items.push({
           name,
