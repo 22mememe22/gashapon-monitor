@@ -22,11 +22,10 @@ export default async function handler(req, res) {
       html.includes("石川県");
 
     return res.status(200).json({
-      success: true,
-      keyword,
-      ishikawa_found: ishikawa,
-      length: html.length
-    });
+  success: true,
+  keyword,
+  preview: html.slice(0, 1000)
+});
 
   } catch (e) {
 
