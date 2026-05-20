@@ -28,8 +28,8 @@ export default async function handler(req, res) {
 
         const link = hrefMatch[1];
 
-        // ❌ ノイズ除去
-        const ignoreWords = [
+        // ❌ 完全ノイズ除去
+        const badWords = [
           "ログイン",
           "会員",
           "登録",
@@ -45,26 +45,28 @@ export default async function handler(req, res) {
           "新規会員",
           "FAQ",
           "アクセス",
-          "ガシャポンLINE",
-          "プライバシーポリシー",
-          "ガシャポンどこ？"
+          "ガシャポンどこ？",
+          "妖怪ウォッチ",
+          "クレヨンしんちゃん",
+          "ハンターハンター",
+          "めじるしアクセサリー"
         ];
 
         if (
           !name ||
           name.length < 6 ||
-          ignoreWords.some((w) => name.includes(w))
+          badWords.some((w) => name.includes(w))
         ) {
           return;
         }
 
-        // 🔥 ここが最重要（keyword一致チェック）
-        if (!name.includes(keyword)) {
+        // ❗「商品ページだけ」に限定
+        if (!link.includes("/products/result.php")) {
           return;
         }
 
-        // ❌ 商品ページ以外除外
-        if (!link.includes("/products/result.php")) {
+        // ❗さらに“検索キーワードURL系”は除外
+        if (link.includes("?free=") && !name.includes(keyword)) {
           return;
         }
 
