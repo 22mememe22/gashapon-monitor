@@ -17,7 +17,6 @@ export default async function handler(req, res) {
 
     const items = [];
 
-    // 超シンプル抽出（落ちない方法）
     const links = html.match(/<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g);
 
     if (links) {
