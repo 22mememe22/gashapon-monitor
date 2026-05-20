@@ -58,7 +58,12 @@ export default async function handler(req, res) {
           return;
         }
 
-        // ❌ 商品ページ以外を除外（ここが重要）
+        // 🔥 ここが最重要（keyword一致チェック）
+        if (!name.includes(keyword)) {
+          return;
+        }
+
+        // ❌ 商品ページ以外除外
         if (!link.includes("/products/result.php")) {
           return;
         }
