@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
         const link = hrefMatch[1];
 
-        // 🔥 ゴミ判定（ここがBの本体）
+        // ❌ ノイズ除去
         const ignoreWords = [
           "ログイン",
           "会員",
@@ -46,26 +46,20 @@ export default async function handler(req, res) {
           "FAQ",
           "アクセス",
           "ガシャポンLINE",
-          "プライバシーポリシー"
+          "プライバシーポリシー",
+          "ガシャポンどこ？"
         ];
 
-        // ❌ 明らかなゴミは除外
         if (
+          !name ||
           name.length < 6 ||
           ignoreWords.some((w) => name.includes(w))
         ) {
           return;
         }
 
-        // ❌ さらに商品っぽくないもの除外
-        if (
-          !name.includes("ガシャポン") &&
-          !name.includes("ちいかわ") &&
-          !name.includes("コレクション") &&
-          !name.includes("シリーズ") &&
-          !name.includes("マスコット") &&
-          !name.includes("フィギュア")
-        ) {
+        // ❌ 商品ページ以外を除外（ここが重要）
+        if (!link.includes("/products/result.php")) {
           return;
         }
 
