@@ -1,5 +1,3 @@
-import * as cheerio from "cheerio";
-
 export default async function handler(req, res) {
   const keyword = req.query.keyword;
 
@@ -17,23 +15,30 @@ export default async function handler(req, res) {
     const response = await fetch(searchUrl);
     const html = await response.text();
 
-    const $ = cheerio.load(html);
-
     const items = [];
 
-    $("a").each((i, el) => {
-      const name = $(el).text().trim();
-      const link = $(el).attr("href");
+    // 超シンプル抽出（落ちない方法）
+    const links = html.match(/<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g);
 
-      if (name && name.length > 5 && link) {
-        items.push({
-          name,
-          link: link.startsWith("http")
-            ? link
-            : "https://gashapon.jp" + link
-        });
-      }
-    });
+    if (links) {
+      links.forEach((a) => {
+        const text = a.replace(/<[^>]*>/g, "").trim();
+        const hrefMatch = a.match(/href="([^"]+)"/);
+
+        if (text && text.length > 5 && hrefMatch) {
+          let link = hrefMatch[1];
+
+          if (!link.startsWith("http")) {
+            link = "https://gashapon.jp" + link;
+          }
+
+          items.push({
+            name: text,
+            link
+          });
+        }
+      });
+    }
 
     return res.status(200).json({
       success: true,
