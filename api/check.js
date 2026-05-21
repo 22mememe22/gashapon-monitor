@@ -1,81 +1,79 @@
 export default async function handler(req, res) {
-  const keyword = req.query.keyword;
-  const target = req.query.target || "";
+  const list = req.body.list; // [{ title, url }]
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
-  if (!keyword) {
+  if (!list || !webhookUrl) {
     return res.status(400).json({
-      error: "keyword required"
+      error: "list or webhook missing"
     });
   }
 
-  const searchUrl =
-    "https://gashapon.jp/products/result.php?search=" +
-    encodeURIComponent(keyword);
+  // 前回データ（本来はDB、簡易でメモリ想定）
+  if (!global.prev) global.prev = {};
 
-  try {
-    const response = await fetch(searchUrl);
-    const html = await response.text();
+  const results = [];
 
-    const items = [];
+  for (const item of list) {
+    try {
+      const response = await fetch(item.url);
+      const html = await response.text();
 
-    const links = html.match(/<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g);
+      // 店舗名っぽいもの抽出（ここどこ想定）
+      const matches = html.match(/<li[^>]*>(.*?)<\/li>/g) || [];
 
-    if (links) {
-      links.forEach((a) => {
-        const name = a.replace(/<[^>]*>/g, "").trim();
-        const hrefMatch = a.match(/href="([^"]+)"/);
+      const stores = matches
+        .map(m => m.replace(/<[^>]*>/g, "").trim())
+        .filter(Boolean);
 
-        if (!name || !hrefMatch) return;
+      const prevStores = global.prev[item.title] || [];
 
-        const link = hrefMatch[1];
+      // 差分
+      const added = stores.filter(x => !prevStores.includes(x));
+      const removed = prevStores.filter(x => !stores.includes(x));
 
-        // ❌ 最低限のノイズだけ除去（弱め）
-        if (
-          name.includes("ログイン") ||
-          name.includes("会員") ||
-          name.includes("LINE") ||
-          name.includes("利用規約") ||
-          name.includes("プライバシー") ||
-          name.length < 5
-        ) {
-          return;
-        }
+      // 保存更新
+      global.prev[item.title] = stores;
 
-        // 🎯 ターゲット（ゆるく一致）
-        if (target) {
-          const t = target.toLowerCase();
-          const n = name.toLowerCase();
+      // 変化なしはスキップ
+      if (added.length === 0 && removed.length === 0) {
+        continue;
+      }
 
-          const match =
-            n.includes(t) ||
-            n.includes("めじるし") ||
-            n.includes("アクセサリー");
+      // Discordメッセージ作成
+      let message = `**${item.title}**\n`;
 
-          if (!match) return;
-        }
+      if (added.length > 0) {
+        message += `🟢 入荷\n` + added.map(s => `+ ${s}`).join("\n") + "\n";
+      }
 
-        let finalLink = link;
-        if (!finalLink.startsWith("http")) {
-          finalLink = "https://gashapon.jp" + finalLink;
-        }
+      if (removed.length > 0) {
+        message += `🔴 削除\n` + removed.map(s => `- ${s}`).join("\n") + "\n";
+      }
 
-        items.push({
-          name,
-          link: finalLink
-        });
+      // Discord送信
+      await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: message
+        })
       });
+
+      results.push({
+        title: item.title,
+        added,
+        removed
+      });
+
+    } catch (e) {
+      console.error(e);
     }
-
-    return res.status(200).json({
-      success: true,
-      keyword,
-      target,
-      items
-    });
-
-  } catch (e) {
-    return res.status(500).json({
-      error: e.toString()
-    });
   }
+
+  return res.status(200).json({
+    success: true,
+    results
+  });
 }
