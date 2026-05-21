@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   const keyword = "ちいかわ";
   const target = "めじるしアクセサリー";
 
-  const DISCORD_WEBHOOK_URL = https://discord.com/api/webhooks/1507021887686053949/5IpB-uO9tlYZ-pZ4pSONuW7be7nXLD_VZjaAG2fTP1lhxj-vL6AKsWDfZ8IKw5kMHkgo";
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1507021887686053949/5IpB-uO9tlYZ-pZ4pSONuW7be7nXLD_VZjaAG2fTP1lhxj-vL6AKsWDfZ8IKw5kMHkgo";
 
   // ===== 検索URL =====
   const searchUrl =
