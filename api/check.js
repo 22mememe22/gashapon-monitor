@@ -29,20 +29,29 @@ export default async function handler(req, res) {
 
         const link = hrefMatch[1];
 
-        // ❌ 最低限のノイズ除去だけ
+        // ❌ 最低限のノイズだけ除去（弱め）
         if (
           name.includes("ログイン") ||
           name.includes("会員") ||
           name.includes("LINE") ||
           name.includes("利用規約") ||
+          name.includes("プライバシー") ||
           name.length < 5
         ) {
           return;
         }
 
-        // 🎯 ここが“完成の核”
-        if (target && !name.includes(target)) {
-          return;
+        // 🎯 ターゲット（ゆるく一致）
+        if (target) {
+          const t = target.toLowerCase();
+          const n = name.toLowerCase();
+
+          const match =
+            n.includes(t) ||
+            n.includes("めじるし") ||
+            n.includes("アクセサリー");
+
+          if (!match) return;
         }
 
         let finalLink = link;
