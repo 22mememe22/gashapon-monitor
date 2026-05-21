@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
   const target = "カードキャプターさくら";
 
-  const DISCORD_WEBHOOK_URL = "ここにWebhookURL";
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1507021887686053949/5IpB-uO9tlYZ-pZ4pSONuW7be7nXLD_VZjaAG2fTP1lhxj-vL6AKsWDfZ8IKw5kMHkgo";
 
   try {
 
