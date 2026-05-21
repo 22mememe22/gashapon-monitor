@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
   const keyword = req.query.keyword;
+  const target = req.query.target || "";
 
   if (!keyword) {
     return res.status(400).json({
@@ -28,36 +29,21 @@ export default async function handler(req, res) {
 
         const link = hrefMatch[1];
 
-        // ❌ ノイズだけ除去（軽くする）
-        const badWords = [
-          "ログイン",
-          "会員",
-          "登録",
-          "LINE",
-          "利用規約",
-          "プライバシー",
-          "ご利用",
-          "よくある",
-          "検索条件",
-          "Cookies",
-          "友だち追加",
-          "送る",
-          "新規会員",
-          "FAQ",
-          "アクセス",
-          "ガシャポンどこ？",
-          "プライバシーポリシー"
-        ];
-
+        // ❌ 最低限のノイズ除去だけ
         if (
-          !name ||
-          name.length < 5 ||
-          badWords.some((w) => name.includes(w))
+          name.includes("ログイン") ||
+          name.includes("会員") ||
+          name.includes("LINE") ||
+          name.includes("利用規約") ||
+          name.length < 5
         ) {
           return;
         }
 
-        // 👉 URL制限は完全に削除（ここ超重要）
+        // 🎯 ここが“完成の核”
+        if (target && !name.includes(target)) {
+          return;
+        }
 
         let finalLink = link;
         if (!finalLink.startsWith("http")) {
@@ -74,6 +60,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       keyword,
+      target,
       items
     });
 
